@@ -2,8 +2,8 @@ package gtkStartup
 
 import (
 	"github.com/gotk3/gotk3/gtk"
-	gtkHelper "github.com/hultan/softteam/gtk"
-	"gtk-startup/pkg/tools"
+	"github.com/hultan/gtk-startup/pkg/tools"
+	gtkHelper "github.com/hultan/softteam-tools/pkg/gtk-helper"
 	"os"
 )
 

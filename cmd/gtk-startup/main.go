@@ -1,8 +1,8 @@
 package main
 
 import (
-	gtkStartup "gtk-startup/internal/gtk-startup"
-	"gtk-startup/pkg/tools"
+	gtkStartup "github.com/hultan/gtk-startup/internal/gtk-startup"
+	"github.com/hultan/gtk-startup/pkg/tools"
 	"os"
 
 	"github.com/gotk3/gotk3/glib"
