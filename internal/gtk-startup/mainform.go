@@ -74,13 +74,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	tools.ErrorCheckWithPanic(err, "Failed to connect the main_window_open_dialog_button.clicked event")
 
 	// Menu
-	menuQuit, err := helper.GetMenuItem("menu_file_quit")
-	tools.ErrorCheckWithPanic(err, "failed to find menu item menu_file_quit")
-	menuQuit.Connect("activate", window.Close)
-
-	menuHelpAbout, err := helper.GetMenuItem("menu_help_about")
-	tools.ErrorCheckWithPanic(err, "failed to find menu item menu_help_about")
-	menuHelpAbout.Connect("activate", m.openAboutDialog)
+	m.setupMenu(window)
 
 	// Show the main window
 	window.ShowAll()
@@ -114,14 +108,28 @@ func (m *MainForm) openAboutDialog() {
 		about.SetModal(true)
 		about.SetPosition(gtk.WIN_POS_CENTER)
 
-		about.Connect("response", func(dialog *gtk.AboutDialog, responseId gtk.ResponseType) {
+		_, err = about.Connect("response", func(dialog *gtk.AboutDialog, responseId gtk.ResponseType) {
 			if responseId == gtk.RESPONSE_CANCEL || responseId == gtk.RESPONSE_DELETE_EVENT {
 				about.Hide()
 			}
 		})
+		tools.ErrorCheckWithoutPanic(err,"failed to connect about_dialog.response signal")
 
 		m.AboutDialog = about
 	}
 
 	m.AboutDialog.Present()
+}
+
+func (m *MainForm) setupMenu(window *gtk.ApplicationWindow) {
+	menuQuit, err := m.Helper.GetMenuItem("menu_file_quit")
+	tools.ErrorCheckWithPanic(err, "failed to find menu item menu_file_quit")
+	_, err = menuQuit.Connect("activate", window.Close)
+	tools.ErrorCheckWithoutPanic(err,"failed to connect menu_file_quit.activate signal")
+
+	menuHelpAbout, err := m.Helper.GetMenuItem("menu_help_about")
+	tools.ErrorCheckWithPanic(err, "failed to find menu item menu_help_about")
+	_, err = menuHelpAbout.Connect("activate", m.openAboutDialog)
+	tools.ErrorCheckWithoutPanic(err,"failed to connect menu_help_about.activate signal")
+
 }

@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -10,6 +11,13 @@ import (
 func ErrorCheckWithPanic(err error, message string) {
 	if err != nil {
 		panic(err.Error() + " : " + message)
+	}
+}
+
+// ErrorCheckWithPanic : panics on error
+func ErrorCheckWithoutPanic(err error, message string) {
+	if err != nil {
+		fmt.Println(err.Error() + " : " + message)
 	}
 }
 
