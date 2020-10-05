@@ -28,17 +28,15 @@ func (d *Dialog) OpenDialog(parent gtk.IWindow) {
 	dialog.SetTransientFor(parent)
 	dialog.SetModal(true)
 
-	// Save button
-	saveButton, err := helper.GetButton("dialog_save_button")
-	tools.ErrorCheckWithPanic(err, "Failed to find dialog_save_button")
-	_, err = saveButton.Connect("clicked", dialog.Destroy)
-	tools.ErrorCheckWithPanic(err, "Failed to connect the dialog_save_button.clicked event")
+	_, err = dialog.Connect("response", func(dialog *gtk.Dialog, responseId gtk.ResponseType) {
+		if responseId == gtk.RESPONSE_CANCEL || responseId == gtk.RESPONSE_DELETE_EVENT {
+			dialog.Hide()
+		} else if responseId == gtk.RESPONSE_ACCEPT || responseId == gtk.RESPONSE_OK || responseId == gtk.RESPONSE_YES {
+			// Save
+			dialog.Hide()
+		}
+	})
+	tools.ErrorCheckWithoutPanic(err,"failed to connect about_dialog.response signal")
 
-	// Cancel button
-	cancelButton, err := helper.GetButton("dialog_cancel_button")
-	tools.ErrorCheckWithPanic(err, "Failed to find dialog_cancel_button")
-	_, err = cancelButton.Connect("clicked", dialog.Destroy)
-	tools.ErrorCheckWithPanic(err, "Failed to connect the dialog_cancel_button.clicked event")
-
-	dialog.Show()
+	dialog.Present()
 }
