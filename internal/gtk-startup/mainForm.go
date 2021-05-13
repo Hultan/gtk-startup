@@ -2,8 +2,6 @@ package gtkStartup
 
 import (
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/gtk-startup/pkg/tools"
-	gtkHelper "github.com/hultan/softteam-tools/pkg/gtk-helper"
 	"os"
 )
 
@@ -13,7 +11,7 @@ const applicationCopyRight = "©SoftTeam AB, 2020"
 
 type MainForm struct {
 	Window      *gtk.ApplicationWindow
-	Helper      *gtkHelper.GtkHelper
+	builder      *SoftBuilder
 	AboutDialog *gtk.AboutDialog
 }
 
@@ -28,54 +26,44 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	// Initialize gtk
 	gtk.Init(&os.Args)
 
-	// Create a new gtk helper
-	builder, err := gtk.BuilderNewFromFile(tools.GetResourcePath("../assets", "main.glade"))
-	tools.ErrorCheckWithPanic(err, "Failed to create builder")
-	helper := gtkHelper.GtkHelperNew(builder)
-	m.Helper = helper
+	// Create a new softBuilder
+	m.builder = newSoftBuilder("main.glade")
 
 	// Get the main window from the glade file
-	window, err := helper.GetApplicationWindow("main_window")
-	tools.ErrorCheckWithPanic(err, "Failed to find main_window")
-
-	m.Window = window
+	m.Window = m.builder.getObject("main_window").(*gtk.ApplicationWindow)
 
 	// Set up main window
-	window.SetApplication(app)
-	window.SetTitle("gtk-startup main window")
+	m.Window.SetApplication(app)
+	m.Window.SetTitle("gtk-startup main window")
 
 	// Hook up the destroy event
-	_, err = window.Connect("destroy", window.Close)
-	tools.ErrorCheckWithPanic(err, "Failed to connect the mainForm.destroy event")
+	_, err := m.Window.Connect("destroy", m.Window.Close)
+	ErrorCheckWithPanic(err, "Failed to connect the mainForm.destroy event")
 
 	// Quit button
-	button, err := helper.GetToolButton("main_window_quit_button")
-	tools.ErrorCheckWithPanic(err, "Failed to find main_window_quit_button")
-	_, err = button.Connect("clicked", window.Close)
-	tools.ErrorCheckWithPanic(err, "Failed to connect the main_window_quit_button.clicked event")
+	button := m.builder.getObject("main_window_quit_button").(*gtk.ToolButton)
+	_, err = button.Connect("clicked", m.Window.Close)
+	ErrorCheckWithPanic(err, "Failed to connect the main_window_quit_button.clicked event")
 
 	// Status bar
-	statusBar, err := helper.GetStatusBar("main_window_status_bar")
-	tools.ErrorCheckWithPanic(err, "Failed to find main_window_status_bar")
+	statusBar := m.builder.getObject("main_window_status_bar").(*gtk.Statusbar)
 	statusBar.Push(statusBar.GetContextId("gtk-startup"), "gtk-startup : version 0.1.0")
 
 	// Open form button
-	openFormButton, err := helper.GetButton("main_window_open_form_button")
-	tools.ErrorCheckWithPanic(err, "Failed to find main_window_open_form_button")
+	openFormButton := m.builder.getObject("main_window_open_form_button").(*gtk.Button)
 	_, err = openFormButton.Connect("clicked", m.OpenForm)
-	tools.ErrorCheckWithPanic(err, "Failed to connect the main_window_open_form_button.clicked event")
+	ErrorCheckWithPanic(err, "Failed to connect the main_window_open_form_button.clicked event")
 
 	// Open dialog button
-	openDialogButton, err := helper.GetButton("main_window_open_dialog_button")
-	tools.ErrorCheckWithPanic(err, "Failed to find main_window_open_dialog_button")
+	openDialogButton := m.builder.getObject("main_window_open_dialog_button").(*gtk.Button)
 	_, err = openDialogButton.Connect("clicked", m.OpenDialog)
-	tools.ErrorCheckWithPanic(err, "Failed to connect the main_window_open_dialog_button.clicked event")
+	ErrorCheckWithPanic(err, "Failed to connect the main_window_open_dialog_button.clicked event")
 
 	// Menu
-	m.setupMenu(window)
+	m.setupMenu(m.Window)
 
 	// Show the main window
-	window.ShowAll()
+	m.Window.ShowAll()
 }
 
 func (m *MainForm) OpenForm() {
@@ -120,14 +108,11 @@ func (m *MainForm) OpenDialog() {
 //}
 
 func (m *MainForm) setupMenu(window *gtk.ApplicationWindow) {
-	menuQuit, err := m.Helper.GetMenuItem("menu_file_quit")
-	tools.ErrorCheckWithPanic(err, "failed to find menu item menu_file_quit")
-	_, err = menuQuit.Connect("activate", window.Close)
-	tools.ErrorCheckWithoutPanic(err,"failed to connect menu_file_quit.activate signal")
+	menuQuit := m.builder.getObject("menu_file_quit").(*gtk.MenuItem)
+	_, err := menuQuit.Connect("activate", window.Close)
+	ErrorCheckWithoutPanic(err,"failed to connect menu_file_quit.activate signal")
 
-	menuHelpAbout, err := m.Helper.GetMenuItem("menu_help_about")
-	tools.ErrorCheckWithPanic(err, "failed to find menu item menu_help_about")
+	menuHelpAbout := m.builder.getObject("menu_help_about").(*gtk.MenuItem)
 	_, err = menuHelpAbout.Connect("activate", m.openAboutDialog)
-	tools.ErrorCheckWithoutPanic(err,"failed to connect menu_help_about.activate signal")
-
+	ErrorCheckWithoutPanic(err,"failed to connect menu_help_about.activate signal")
 }
