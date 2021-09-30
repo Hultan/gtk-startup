@@ -1,8 +1,9 @@
 package main
 
 import (
-	gtkStartup "github.com/hultan/gtk-startup/internal/gtk-startup"
 	"os"
+
+	gtkStartup "github.com/hultan/gtk-startup/internal/gtk-startup"
 
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -16,12 +17,16 @@ const (
 func main() {
 	// Create a new application
 	application, err := gtk.ApplicationNew(ApplicationId, ApplicationFlags)
-	gtkStartup.ErrorCheckWithPanic(err, "Failed to create GTK Application")
+	if err != nil {
+		panic("Failed to create GTK Application : " + err.Error())
+	}
 
 	mainForm := gtkStartup.NewMainForm()
 	// Hook up the activate event handler
-	_, err = application.Connect("activate", mainForm.OpenMainForm)
-	gtkStartup.ErrorCheckWithPanic(err, "Failed to connect Application.Activate event")
+	application.Connect("activate", mainForm.OpenMainForm)
+	if err != nil {
+		panic("Failed to connect Application.Activate event : " + err.Error())
+	}
 
 	// Start the application (and exit when it is done)
 	os.Exit(application.Run(nil))

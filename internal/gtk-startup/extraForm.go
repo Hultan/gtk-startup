@@ -2,6 +2,8 @@ package gtkStartup
 
 import (
 	"github.com/gotk3/gotk3/gtk"
+
+	"github.com/hultan/softteam/framework"
 )
 
 type ExtraForm struct {
@@ -12,12 +14,14 @@ func NewExtraForm() *ExtraForm {
 	return new(ExtraForm)
 }
 
-func (e *ExtraForm) OpenForm() {
+func (e *ExtraForm) OpenForm(fw *framework.Framework) {
 	// Create a new gtk helper
-	builder := newSoftBuilder("main.glade")
-
+	builder, err := fw.Gtk.CreateBuilder("main.glade")
+	if err != nil {
+		panic(err)
+	}
 	// Get the extra window from glade
-	extraWindow := builder.getObject("extra_window").(*gtk.Window)
+	extraWindow := builder.GetObject("extra_window").(*gtk.Window)
 
 	// Set up the extra window
 	extraWindow.SetTitle("extra form")
@@ -27,13 +31,11 @@ func (e *ExtraForm) OpenForm() {
 	extraWindow.SetPosition(gtk.WIN_POS_CENTER_ALWAYS)
 
 	// Hook up the destroy event
-	_, err := extraWindow.Connect("destroy", extraWindow.Destroy)
-	ErrorCheckWithPanic(err, "Failed to connect the extraWindow.destroy event")
+	extraWindow.Connect("destroy", extraWindow.Destroy)
 
 	// Close button
-	button := builder.getObject("extra_window_close_button").(*gtk.Button)
-	_, err = button.Connect("clicked", extraWindow.Destroy)
-	ErrorCheckWithPanic(err, "Failed to connect the extra_window_close_button.clicked event")
+	button := builder.GetObject("extra_window_close_button").(*gtk.Button)
+	button.Connect("clicked", extraWindow.Destroy)
 
 	e.Window = extraWindow
 
