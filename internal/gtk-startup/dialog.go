@@ -2,40 +2,32 @@ package gtkStartup
 
 import (
 	"github.com/gotk3/gotk3/gtk"
-
-	"github.com/hultan/softteam/framework"
 )
 
-type Dialog struct {
-	Dialog *gtk.Dialog
-}
+func (m *MainForm) openDialog() {
+	if m.dialog == nil {
+		// Get the dialog window from glade
+		m.dialog = m.builder.getObject("settings_dialog").(*gtk.Dialog)
 
-func NewDialog() *Dialog {
-	return new(Dialog)
-}
+		m.dialog.SetTitle("settings dialog")
+		m.dialog.SetTransientFor(m.window)
+		m.dialog.SetModal(true)
 
-func (d *Dialog) OpenDialog(parent gtk.IWindow, fw *framework.Framework) {
-	// Create a new softBuilder
-	builder, err := fw.Gtk.CreateBuilder("main.glade")
-	if err != nil {
-		panic(err)
+		// Hook up the destroy event
+		m.dialog.Connect(
+			"destroy", func(w *gtk.Dialog) {
+				m.dialog.Destroy()
+				m.dialog = nil
+			},
+		)
 	}
 
-	// Get the dialog window from glade
-	dialog := builder.GetObject("settings_dialog").(*gtk.Dialog)
+	responseId := m.dialog.Run()
 
-	dialog.SetTitle("settings dialog")
-	dialog.SetTransientFor(parent)
-	dialog.SetModal(true)
-
-	dialog.Connect("response", func(dialog *gtk.Dialog, responseId gtk.ResponseType) {
-		if responseId == gtk.RESPONSE_CANCEL || responseId == gtk.RESPONSE_DELETE_EVENT {
-			dialog.Hide()
-		} else if responseId == gtk.RESPONSE_ACCEPT || responseId == gtk.RESPONSE_OK || responseId == gtk.RESPONSE_YES {
-			// Save
-			dialog.Hide()
-		}
-	})
-
-	dialog.Present()
+	if responseId == gtk.RESPONSE_CANCEL || responseId == gtk.RESPONSE_DELETE_EVENT {
+		m.dialog.Hide()
+	} else if responseId == gtk.RESPONSE_ACCEPT || responseId == gtk.RESPONSE_OK || responseId == gtk.RESPONSE_YES {
+		// Save settings here
+		m.dialog.Hide()
+	}
 }

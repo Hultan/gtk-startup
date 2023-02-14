@@ -3,34 +3,35 @@ package gtkStartup
 import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
-
-	"github.com/hultan/softteam/framework"
 )
 
-func (m *MainForm) openAboutDialog(fw *framework.Framework) {
-	if m.AboutDialog == nil {
-		about := m.builder.GetObject("about_dialog").(*gtk.AboutDialog)
-		about.SetDestroyWithParent(true)
-		about.SetTransientFor(m.Window)
-		about.SetProgramName(applicationTitle)
-		about.SetComments("An application...")
-		about.SetVersion(applicationVersion)
-		about.SetCopyright(applicationCopyRight)
-		image, err := gdk.PixbufNewFromFile(fw.Resource.GetResourcePath("application.png"))
+func (m *MainForm) openAboutDialog() {
+	if m.aboutDialog == nil {
+		m.aboutDialog = m.builder.getObject("about_dialog").(*gtk.AboutDialog)
+
+		m.aboutDialog.SetModal(true)
+		m.aboutDialog.SetTransientFor(m.window)
+		m.aboutDialog.SetPosition(gtk.WIN_POS_CENTER_ON_PARENT)
+
+		// Hook up the destroy event
+		m.aboutDialog.Connect(
+			"destroy", func() {
+				m.aboutDialog.Destroy()
+				m.aboutDialog = nil
+			},
+		)
+
+		// About application
+		m.aboutDialog.SetProgramName(applicationTitle)
+		m.aboutDialog.SetComments("An application...")
+		m.aboutDialog.SetVersion(applicationVersion)
+		m.aboutDialog.SetCopyright(applicationCopyRight)
+		image, err := gdk.PixbufNewFromBytesOnly(applicationIcon)
 		if err == nil {
-			about.SetLogo(image)
+			m.aboutDialog.SetLogo(image)
 		}
-		about.SetModal(true)
-		about.SetPosition(gtk.WIN_POS_CENTER)
-
-		about.Connect("response", func(dialog *gtk.AboutDialog, responseId gtk.ResponseType) {
-			if responseId == gtk.RESPONSE_CANCEL || responseId == gtk.RESPONSE_DELETE_EVENT {
-				about.Hide()
-			}
-		})
-
-		m.AboutDialog = about
 	}
 
-	m.AboutDialog.Present()
+	m.aboutDialog.Run()
+	m.aboutDialog.Hide()
 }

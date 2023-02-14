@@ -1,11 +1,10 @@
 package gtkStartup
 
 import (
+	_ "embed"
 	"os"
 
 	"github.com/gotk3/gotk3/gtk"
-
-	"github.com/hultan/softteam/framework"
 )
 
 const applicationTitle = "gtk-startup"
@@ -13,10 +12,18 @@ const applicationVersion = "v 0.01"
 const applicationCopyRight = "©SoftTeam AB, 2020"
 
 type MainForm struct {
-	Window      *gtk.ApplicationWindow
-	builder     *framework.GtkBuilder
-	AboutDialog *gtk.AboutDialog
+	window      *gtk.ApplicationWindow
+	builder     *gtkBuilder
+	aboutDialog *gtk.AboutDialog
+	extraForm   *gtk.Window
+	dialog      *gtk.Dialog
 }
+
+//go:embed assets/main.glade
+var gladeFile string
+
+//go:embed assets/application.png
+var applicationIcon []byte
 
 // NewMainForm : Creates a new MainForm object
 func NewMainForm() *MainForm {
@@ -30,66 +37,61 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	gtk.Init(&os.Args)
 
 	// Create a new softBuilder
-	fw := framework.NewFramework()
-	builder, err := fw.Gtk.CreateBuilder("main.glade")
+	builder, err := newBuilder(gladeFile)
 	if err != nil {
 		panic(err)
 	}
 	m.builder = builder
 
 	// Get the main window from the glade file
-	m.Window = m.builder.GetObject("main_window").(*gtk.ApplicationWindow)
+	m.window = m.builder.getObject("main_window").(*gtk.ApplicationWindow)
 
 	// Set up main window
-	m.Window.SetApplication(app)
-	m.Window.SetTitle("gtk-startup main window")
+	m.window.SetApplication(app)
+	m.window.SetTitle("gtk-startup main window")
 
 	// Hook up the destroy event
-	m.Window.Connect("destroy", m.Window.Close)
+	m.window.Connect("destroy", m.window.Close)
 
 	// Quit button
-	button := m.builder.GetObject("main_window_quit_button").(*gtk.ToolButton)
-	button.Connect("clicked", m.Window.Close)
+	button := m.builder.getObject("main_window_quit_button").(*gtk.ToolButton)
+	button.Connect("clicked", m.window.Close)
 
 	// Status bar
-	statusBar := m.builder.GetObject("main_window_status_bar").(*gtk.Statusbar)
+	statusBar := m.builder.getObject("main_window_status_bar").(*gtk.Statusbar)
 	statusBar.Push(statusBar.GetContextId("gtk-startup"), "gtk-startup : version 0.1.0")
 
 	// Open form button
-	openFormButton := m.builder.GetObject("main_window_open_form_button").(*gtk.Button)
-	openFormButton.Connect("clicked", func() {
-		m.OpenForm(fw)
-	})
+	openFormButton := m.builder.getObject("main_window_open_form_button").(*gtk.Button)
+	openFormButton.Connect(
+		"clicked", func() {
+			m.openForm()
+		},
+	)
 
 	// Open dialog button
-	openDialogButton := m.builder.GetObject("main_window_open_dialog_button").(*gtk.Button)
-	openDialogButton.Connect("clicked", func() {
-		m.OpenDialog(fw)
-	})
+	openDialogButton := m.builder.getObject("main_window_open_dialog_button").(*gtk.Button)
+	openDialogButton.Connect(
+		"clicked", func() {
+			m.openDialog()
+		},
+	)
 
 	// Menu
-	m.setupMenu(fw)
+	m.setupMenu()
 
 	// Show the main window
-	m.Window.ShowAll()
+	m.window.ShowAll()
 }
 
-func (m *MainForm) OpenForm(fw *framework.Framework) {
-	extraForm := NewExtraForm()
-	extraForm.OpenForm(fw)
-}
+func (m *MainForm) setupMenu() {
+	menuQuit := m.builder.getObject("menu_file_quit").(*gtk.MenuItem)
+	menuQuit.Connect("activate", m.window.Close)
 
-func (m *MainForm) OpenDialog(fw *framework.Framework) {
-	dialog := NewDialog()
-	dialog.OpenDialog(m.Window, fw)
-}
-
-func (m *MainForm) setupMenu(fw *framework.Framework) {
-	menuQuit := m.builder.GetObject("menu_file_quit").(*gtk.MenuItem)
-	menuQuit.Connect("activate", m.Window.Close)
-
-	menuHelpAbout := m.builder.GetObject("menu_help_about").(*gtk.MenuItem)
-	menuHelpAbout.Connect("activate", func() {
-		m.openAboutDialog(fw)
-	})
+	menuHelpAbout := m.builder.getObject("menu_help_about").(*gtk.MenuItem)
+	menuHelpAbout.Connect(
+		"activate", func() {
+			m.openAboutDialog()
+		},
+	)
 }
