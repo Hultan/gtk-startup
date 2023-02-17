@@ -51,11 +51,11 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	m.window.SetTitle("gtk-startup main window")
 
 	// Hook up the destroy event
-	m.window.Connect("destroy", m.window.Close)
+	m.window.Connect("destroy", m.window.Destroy)
 
 	// Quit button
 	button := m.builder.getObject("main_window_quit_button").(*gtk.ToolButton)
-	button.Connect("clicked", m.window.Close)
+	button.Connect("clicked", m.window.Destroy)
 
 	// Status bar
 	statusBar := m.builder.getObject("main_window_status_bar").(*gtk.Statusbar)
@@ -86,7 +86,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 
 func (m *MainForm) setupMenu() {
 	menuQuit := m.builder.getObject("menu_file_quit").(*gtk.MenuItem)
-	menuQuit.Connect("activate", m.window.Close)
+	menuQuit.Connect("activate", m.window.Destroy)
 
 	menuHelpAbout := m.builder.getObject("menu_help_about").(*gtk.MenuItem)
 	menuHelpAbout.Connect(
