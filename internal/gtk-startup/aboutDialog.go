@@ -5,7 +5,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func (m *MainForm) openAboutDialog() {
+func (m MainForm) openAboutDialog() {
 	if m.aboutDialog == nil {
 		m.aboutDialog = m.builder.getObject("about_dialog").(*gtk.AboutDialog)
 

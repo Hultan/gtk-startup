@@ -26,13 +26,12 @@ var gladeFile string
 var applicationIcon []byte
 
 // NewMainForm : Creates a new MainForm object
-func NewMainForm() *MainForm {
-	mainForm := new(MainForm)
-	return mainForm
+func NewMainForm() MainForm {
+	return MainForm{}
 }
 
 // OpenMainForm : Opens the MainForm window
-func (m *MainForm) OpenMainForm(app *gtk.Application) {
+func (m MainForm) OpenMainForm(app *gtk.Application) {
 	// Initialize gtk
 	gtk.Init(&os.Args)
 
@@ -84,7 +83,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	m.window.ShowAll()
 }
 
-func (m *MainForm) setupMenu() {
+func (m MainForm) setupMenu() {
 	menuQuit := m.builder.getObject("menu_file_quit").(*gtk.MenuItem)
 	menuQuit.Connect("activate", m.window.Destroy)
 
