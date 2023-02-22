@@ -4,7 +4,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func (m MainForm) openDialog() {
+func (m *MainForm) openDialog() {
 	if m.dialog == nil {
 		// Get the dialog window from glade
 		m.dialog = m.builder.getObject("settings_dialog").(*gtk.Dialog)

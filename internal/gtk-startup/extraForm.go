@@ -4,7 +4,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func (m MainForm) openForm() {
+func (m *MainForm) openForm() {
 	if m.extraForm == nil {
 		// Get the extra window from the glade file
 		m.extraForm = m.builder.getObject("extra_window").(*gtk.Window)
